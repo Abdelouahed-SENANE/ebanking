@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=ebanking'
+      - 'POSTGRES_PASSWORD=1994'
+      - 'POSTGRES_USER=postgres'
+    ports:
+      - '5432:5432'
