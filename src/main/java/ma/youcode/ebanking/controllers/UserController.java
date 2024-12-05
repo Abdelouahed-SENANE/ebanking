@@ -25,17 +25,17 @@ public class UserController {
 private final UserService userService;
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<SuccessDTO> getUser(@PathVariable Long id) {
+    public ResponseEntity<SuccessDTO> handleGetUser(@PathVariable Long id) {
         UserResponseDTO response = userService.read(id);
     return success(200 , "Retrieved." , "user" , response);
     }
     @PostMapping("/login")
-    public ResponseEntity<SuccessDTO> login(@RequestBody @Valid UserRequestDTO userRequestDTO) {
+    public ResponseEntity<SuccessDTO> handleLogin(@RequestBody @Valid UserRequestDTO userRequestDTO) {
         return success(200 , "Authenticated Successfully.");
     }
 
     @GetMapping("/all")
-    public ResponseEntity<SuccessDTO> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<SuccessDTO> handleGetAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<UserResponseDTO> response = userService.readAll(pageable);
             return success(200, "Retrieved.", "users", response);
@@ -43,19 +43,19 @@ private final UserService userService;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<SuccessDTO> regiter(@Valid @RequestBody UserRequestDTO requestDTO ){
-         UserResponseDTO response = userService.create(requestDTO);
+    public ResponseEntity<SuccessDTO> handleRegister(@Valid @RequestBody UserRequestDTO requestDTO ){
+         UserResponseDTO response = userService.register(requestDTO);
         return success(201 , "Created." ,  "user" , response);
-        }
+    }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<SuccessDTO> updateUser(@PathVariable Long id ,@Valid  @RequestBody UserRequestDTO requestDTO ){
+    public ResponseEntity<SuccessDTO> handleUpdate(@PathVariable Long id ,@Valid  @RequestBody UserRequestDTO requestDTO ){
         UserResponseDTO response = userService.update(requestDTO , id);
         return success(200 , "Updated." ,  "user" , response);
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<SuccessDTO> deleteUser(@PathVariable Long id){
+    public ResponseEntity<SuccessDTO> handleDelete(@PathVariable Long id){
         UserResponseDTO response = userService.delete(id);
         return success(200 , "Deleted." , "user" , response);
     }
