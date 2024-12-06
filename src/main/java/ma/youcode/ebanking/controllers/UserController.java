@@ -3,6 +3,8 @@ package ma.youcode.ebanking.controllers;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import ma.senane.utilities.dtos.SuccessDTO;
+import ma.senane.utilities.validation.groups.OnCreate;
+import ma.senane.utilities.validation.groups.OnUpdate;
 import ma.youcode.ebanking.dtos.request.UserRequestDTO;
 import ma.youcode.ebanking.dtos.response.UserResponseDTO;
 import ma.youcode.ebanking.services.interfaces.UserService;
@@ -10,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -25,15 +29,18 @@ public class UserController {
 private final UserService userService;
 
     @GetMapping("/get/{id}")
+    @PreAuthorize(value = "hasRole('ROLE_ADMIN')")
     public ResponseEntity<SuccessDTO> handleGetUser(@PathVariable Long id) {
         UserResponseDTO response = userService.read(id);
     return success(200 , "Retrieved." , "user" , response);
     }
+
     @PostMapping("/login")
     public ResponseEntity<SuccessDTO> handleLogin(@RequestBody @Valid UserRequestDTO userRequestDTO) {
         return success(200 , "Authenticated Successfully.");
     }
 
+    @PreAuthorize(value = "hasRole('ROLE_ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<SuccessDTO> handleGetAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -43,16 +50,20 @@ private final UserService userService;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<SuccessDTO> handleRegister(@Valid @RequestBody UserRequestDTO requestDTO ){
+    @PreAuthorize(value = "hasRole('ROLE_ADMIN')")
+    public ResponseEntity<SuccessDTO> handleRegister(@Validated(OnCreate.class) @RequestBody UserRequestDTO requestDTO ){
          UserResponseDTO response = userService.register(requestDTO);
         return success(201 , "Created." ,  "user" , response);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<SuccessDTO> handleUpdate(@PathVariable Long id ,@Valid  @RequestBody UserRequestDTO requestDTO ){
-        UserResponseDTO response = userService.update(requestDTO , id);
+    @PreAuthorize(value = "hasRole('ROLE_USER')")
+    @PutMapping("/update/{username}")
+    public ResponseEntity<SuccessDTO> handleUpdate(@PathVariable String username ,@Validated(OnUpdate.class)  @RequestBody UserRequestDTO requestDTO ){
+        UserResponseDTO response = userService.update(requestDTO , username);
         return success(200 , "Updated." ,  "user" , response);
     }
+
+    @PreAuthorize(value = "hasRole('ROLE_ADMIN')")
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<SuccessDTO> handleDelete(@PathVariable Long id){

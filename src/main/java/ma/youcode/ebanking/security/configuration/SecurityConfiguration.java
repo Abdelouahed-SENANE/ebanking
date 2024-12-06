@@ -1,42 +1,38 @@
-package ma.youcode.ebanking.security;
+package ma.youcode.ebanking.security.configuration;
 
 import lombok.RequiredArgsConstructor;
+import ma.youcode.ebanking.security.providers.AuthProviderImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.*;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private final AuthProvider authProvider;
+    private final AuthProviderImpl authProviderImpl;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
 
     @Bean
     public AuthenticationManager authManager() {
-        return new ProviderManager(Collections.singletonList(authProvider));
+        return new ProviderManager(Collections.singletonList(authProviderImpl));
     }
 
     @Bean
@@ -45,9 +41,10 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/notices", "/api/contacts" , "/api/user/register").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
                         .anyRequest().authenticated()
-                ).httpBasic(Customizer.withDefaults());
+                )
+                .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }

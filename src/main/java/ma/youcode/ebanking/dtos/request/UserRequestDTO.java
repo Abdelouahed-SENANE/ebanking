@@ -2,17 +2,15 @@ package ma.youcode.ebanking.dtos.request;
 
 
 import jakarta.validation.constraints.NotNull;
-import ma.senane.utilities.validation.annotations.Unique;
-import ma.youcode.ebanking.entities.Role;
-import ma.youcode.ebanking.entities.User;
+import ma.senane.utilities.validation.groups.OnCreate;
+import ma.senane.utilities.validation.groups.OnUpdate;
+
 
 import java.io.Serializable;
-import java.util.Set;
 
 public record UserRequestDTO(
-        @NotNull String username,
-        @NotNull String email,
-        @NotNull String password,
-        Set<Role> roles
+        @NotNull(groups = OnCreate.class) String username,
+        @NotNull(groups = {OnCreate.class, OnUpdate.class}) String password,
+        @NotNull(groups = OnUpdate.class , message = "New password must be not null.") String newPassword
 ) implements Serializable {
 }

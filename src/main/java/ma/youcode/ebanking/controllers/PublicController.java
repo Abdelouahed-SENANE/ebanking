@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import static ma.senane.utilities.response.Response.success;
 
 @RestController
-@RequestMapping("/api")
-public class TestController {
+@RequestMapping("/api/public")
+public class PublicController {
 
     @GetMapping("/contacts")
     public ResponseEntity<SuccessDTO> contacts() {
