@@ -26,6 +26,7 @@ public class AuthProviderImpl implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         UserDetails userDetails = userDetailsService.loadUserByUsername(authentication.getName());
+
         if (userDetails == null) {
             throw new UsernameNotFoundException("User not found.");
         }

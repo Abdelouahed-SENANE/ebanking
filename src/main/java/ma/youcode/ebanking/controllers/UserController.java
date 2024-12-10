@@ -8,6 +8,7 @@ import ma.senane.utilities.validation.groups.OnUpdate;
 import ma.youcode.ebanking.dtos.request.UserRequestDTO;
 import ma.youcode.ebanking.dtos.response.UserResponseDTO;
 import ma.youcode.ebanking.services.interfaces.UserService;
+import ma.youcode.ebanking.utils.groups.OnAdminEditRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,8 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.time.LocalDate;
 import static ma.senane.utilities.response.Response.success;
 
 
@@ -28,10 +27,10 @@ public class UserController {
 
 private final UserService userService;
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/get/{username}")
     @PreAuthorize(value = "hasRole('ROLE_ADMIN')")
-    public ResponseEntity<SuccessDTO> handleGetUser(@PathVariable Long id) {
-        UserResponseDTO response = userService.read(id);
+    public ResponseEntity<SuccessDTO> handleGetUser(@PathVariable String username) {
+        UserResponseDTO response = userService.read(username);
     return success(200 , "Retrieved." , "user" , response);
     }
 
@@ -58,16 +57,15 @@ private final UserService userService;
 
     @PreAuthorize(value = "hasRole('ROLE_USER')")
     @PutMapping("/update/{username}")
-    public ResponseEntity<SuccessDTO> handleUpdate(@PathVariable String username ,@Validated(OnUpdate.class)  @RequestBody UserRequestDTO requestDTO ){
+    public ResponseEntity<SuccessDTO> handleUpdate(@PathVariable String username ,@Validated(OnAdminEditRole.class)  @RequestBody UserRequestDTO requestDTO ){
         UserResponseDTO response = userService.update(requestDTO , username);
         return success(200 , "Updated." ,  "user" , response);
     }
 
     @PreAuthorize(value = "hasRole('ROLE_ADMIN')")
-
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<SuccessDTO> handleDelete(@PathVariable Long id){
-        UserResponseDTO response = userService.delete(id);
+    @DeleteMapping("/delete/{username}")
+    public ResponseEntity<SuccessDTO> handleDelete(@PathVariable String username){
+        UserResponseDTO response = userService.delete(username);
         return success(200 , "Deleted." , "user" , response);
     }
 }

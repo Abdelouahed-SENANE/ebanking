@@ -11,10 +11,11 @@ public interface UserService {
 
     UserResponseDTO register(UserRequestDTO requestDTO);
     UserResponseDTO update(UserRequestDTO requestDTO , String username);
-    UserResponseDTO delete(Long userId);
-    UserResponseDTO read(Long userId);
+    UserResponseDTO delete(String username);
+    UserResponseDTO read(String username);
     Page<UserResponseDTO> readAll(Pageable pageable);
     List<UserResponseDTO> readAll();
     User getUserById(Long userId);
     String getAuthUserName();
+    UserResponseDTO editRoles(String username, UserRequestDTO userRequestDTO);
 }

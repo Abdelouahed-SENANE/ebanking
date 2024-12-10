@@ -6,6 +6,7 @@ import ma.youcode.ebanking.entities.Role;
 import ma.youcode.ebanking.entities.User;
 import ma.youcode.ebanking.exceptions.custom.PasswordUnchangedException;
 import ma.youcode.ebanking.exceptions.custom.UnauthorizedActionException;
+import ma.youcode.ebanking.exceptions.custom.UsernameAlreadyExistsException;
 import ma.youcode.ebanking.mappers.UserMapper;
 import ma.youcode.ebanking.repositories.interfaces.RoleRepository;
 import ma.youcode.ebanking.repositories.interfaces.UserRepository;
@@ -42,6 +43,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO register(UserRequestDTO requestDTO) {
 
+        if (isExists(requestDTO.username())) {
+            throw new UsernameAlreadyExistsException(requestDTO.username());
+        }
+
         User user = fromRequestDTO(requestDTO);
         user.setPassword(encodePassword(user.getPassword()));
         user.addRole(getUserRole());
@@ -68,7 +73,7 @@ public class UserServiceImpl implements UserService {
         User user = getUserByUsername(username);
 
         if (!passwordEncoder.matches(requestDTO.password(), user.getPassword())) {
-            throw new PasswordUnchangedException("Old password doesn't match with current password.");
+            throw new PasswordUnchangedException("Old password is incorrect.");
         }
         if (passwordEncoder.matches(requestDTO.newPassword(), user.getPassword())) {
             throw new PasswordUnchangedException("The new password must be different from the old password.");
@@ -79,17 +84,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO delete(Long userId) {
+    public UserResponseDTO delete(String username) {
 
-        User user = getUserById(userId);
+        User user = getUserByUsername(username);
         userRepository.delete(user);
         return toResponseDTO(user);
 
     }
 
     @Override
-    public UserResponseDTO read(Long userId) {
-        User user = getUserById(userId);
+    public UserResponseDTO read(String username) {
+        User user = getUserByUsername(username);
         return toResponseDTO(user);
     }
 
@@ -128,7 +133,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponseDTO editRoles(String username, UserRequestDTO requestDTO) {
+        User user = getUserByUsername(username);
+        for (String role : requestDTO.roles()) {
+            user.addRole(roleRepository.findByName(role).orElseThrow(() -> new EntityNotFoundException("Role not found.")));
+        }
+        return toResponseDTO(userRepository.save(user));
+    }
+
+    @Override
     public String getAuthUserName() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+    private boolean isExists(String username) {
+        return userRepository.findByUsername(username).isPresent();
     }
 }

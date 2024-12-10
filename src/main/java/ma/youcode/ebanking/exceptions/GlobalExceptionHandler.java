@@ -3,6 +3,7 @@ package ma.youcode.ebanking.exceptions;
 import ma.senane.utilities.dtos.ErrorDTO;
 import ma.youcode.ebanking.exceptions.custom.PasswordUnchangedException;
 import ma.youcode.ebanking.exceptions.custom.UnauthorizedActionException;
+import ma.youcode.ebanking.exceptions.custom.UsernameAlreadyExistsException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -33,11 +34,16 @@ public class GlobalExceptionHandler  {
 
     @ExceptionHandler(UnauthorizedActionException.class)
     public ResponseEntity<ErrorDTO> handleAccessDeniedException(UnauthorizedActionException e) {
-        return error(403 , e.getMessage());
+        return error(401 , e.getMessage());
     }
 
     @ExceptionHandler(PasswordUnchangedException.class)
-    public ResponseEntity<ErrorDTO> handleAccessDeniedException(PasswordUnchangedException e) {
-        return error(403 , e.getMessage());
+    public ResponseEntity<ErrorDTO> handlePasswordUnchangedException(PasswordUnchangedException e) {
+        return error(409 , e.getMessage());
+    }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<ErrorDTO> handleUsernameAlreadyExistsException(UsernameAlreadyExistsException e) {
+        return error(409 , e.getMessage());
     }
 }
