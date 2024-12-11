@@ -1,6 +1,7 @@
 package ma.youcode.ebanking.exceptions;
 
 import ma.senane.utilities.dtos.ErrorDTO;
+import ma.senane.utilities.exceptions.AbstractGlobalHandlerException;
 import ma.youcode.ebanking.exceptions.custom.PasswordUnchangedException;
 import ma.youcode.ebanking.exceptions.custom.UnauthorizedActionException;
 import ma.youcode.ebanking.exceptions.custom.UsernameAlreadyExistsException;
@@ -15,7 +16,7 @@ import java.nio.file.AccessDeniedException;
 import static ma.senane.utilities.response.Response.error;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler  {
+public class GlobalExceptionHandler extends AbstractGlobalHandlerException {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorDTO> handleBadCredentialsException(BadCredentialsException e) {

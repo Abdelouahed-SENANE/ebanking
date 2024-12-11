@@ -12,6 +12,9 @@ import ma.youcode.ebanking.repositories.interfaces.RoleRepository;
 import ma.youcode.ebanking.repositories.interfaces.UserRepository;
 import ma.youcode.ebanking.services.interfaces.UserService;
 
+import ma.youcode.ebanking.utils.enums.RoleName;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +37,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private static final Logger log = LogManager.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -48,7 +52,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = fromRequestDTO(requestDTO);
-        user.setPassword(encodePassword(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(requestDTO.password()));
         user.addRole(getUserRole());
         return toResponseDTO(userRepository.save(user));
 
@@ -59,7 +63,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private Role getUserRole() {
-        return roleRepository.findByName("ROLE_USER")
+        return roleRepository.findByName(RoleName.ROLE_USER)
                 .orElseThrow(() -> new EntityNotFoundException("Role not found."));
     }
 
@@ -127,6 +131,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found."));
     }
+
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("User not found."));
@@ -134,12 +139,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO editRoles(String username, UserRequestDTO requestDTO) {
+
         User user = getUserByUsername(username);
-        for (String role : requestDTO.roles()) {
-            user.addRole(roleRepository.findByName(role).orElseThrow(() -> new EntityNotFoundException("Role not found.")));
-        }
+
+        user.getRoles().clear();
+        Set<Role> roles = assignNewRoles(requestDTO);
+        user.getRoles().addAll(roles);
+
         return toResponseDTO(userRepository.save(user));
     }
+
+    private Set<Role> assignNewRoles(UserRequestDTO requestDTO) {
+        Set<Role> roles = new HashSet<>();
+        for (RoleName role : requestDTO.roles()) {
+            roles.add(roleRepository.findByName(RoleName.valueOf(role.name())).orElseThrow(() -> new EntityNotFoundException("Role not found.")));
+        }
+        return roles;
+    }
+
 
     @Override
     public String getAuthUserName() {

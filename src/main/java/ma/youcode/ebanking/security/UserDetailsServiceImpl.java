@@ -3,6 +3,7 @@ package ma.youcode.ebanking.security;
 import lombok.RequiredArgsConstructor;
 import ma.youcode.ebanking.entities.User;
 import ma.youcode.ebanking.repositories.interfaces.UserRepository;
+import ma.youcode.ebanking.utils.enums.RoleName;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,7 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private List<SimpleGrantedAuthority> getAuthorities(User user) {
         return user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
                 .toList();
     }
 }
